@@ -57,7 +57,7 @@ def transformMatrix(spline_points, translate):
     # CALCULATE OUTVECS: Apply math to points
     outvecs = np.zeros(num_rows, num_cols)
     for i in range(num_rows):
-        if (i == num_rows - 1):
+        if i == num_rows - 1:
             outvecs[i, 0] = points[i, 0]
             outvecs[i, 1] = points[i, 1]
             outvecs[i, 2] = points[i, 2]
@@ -73,7 +73,7 @@ def transformMatrix(spline_points, translate):
 def generateXML(filePath, num_splines, spline_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
                 point_left, translate):
     def stringCreator(value1, value2, value3):
-        string1, string2, string3 = '%.5f' % (value1), '%.5f' % (value2), '%.5f' % (value3)
+        string1, string2, string3 = '%.5f' % value1, '%.5f' % value2, '%.5f' % value3
         string = string1 + " " + string2 + " " + string3
         return string
 
@@ -163,8 +163,8 @@ def processData():
         invec_right, outvec_right, point_right = transformMatrix(right, translate)
         left = getSplinePoints(splines[1])
         invec_left, outvec_left, point_left = transformMatrix(left, translate)
-        generateXML(outputPath, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
-                    point_left, translate)
+        generateXML(outputPath, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left,
+                    outvec_left, point_left, translate)
 
 
 if __name__ == "__main__":
