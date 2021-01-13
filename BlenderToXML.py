@@ -1,15 +1,13 @@
-from bpy import context
-import numpy as np
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
-# from bs4 import BeautifulSoup
 
+import numpy as np
+from bpy import context
 
 # User inputs
 filename = "C:/output.xml"
 
 
-# Returns origin, number of splines, curve name, and splines that make up curve from Blender
 def getVars():
     objs = context.selected_objects
     obj = objs[0]
@@ -20,7 +18,6 @@ def getVars():
     return origin, numSplines, curveName, splines
 
 
-# Returns matrix of spline points
 def getSplinePoints(spline):
     return [point.co for point in spline.points]
 
@@ -161,7 +158,7 @@ def processData():
     # Process data
     if num_splines == 1:
         center = getSplinePoints(splines[0])
-        invec_center, outvec_center, point_center= transformMatrix(center, translate)
+        invec_center, outvec_center, point_center = transformMatrix(center, translate)
         generateXML(filename, num_splines, curve_name, invec_center, outvec_center, point_center, 0, 0, 0, translate)
     elif num_splines == 2:
         right = getSplinePoints(splines[0])
@@ -170,8 +167,6 @@ def processData():
         invec_left, outvec_left, point_left = transformMatrix(left, translate)
         generateXML(filename, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
                     point_left, translate)
-
-    # BeautifulSoup(filename, "xml").prettify()
 
 
 if __name__ == "__main__":
