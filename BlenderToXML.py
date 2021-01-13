@@ -8,14 +8,20 @@ from bpy import context
 filename = "C:/output.xml"
 
 
-def getVars():
-    objs = context.selected_objects
-    obj = objs[0]
+def getBlenderObjVars(obj):
     origin = obj.location
     numSplines = len(obj.data.splines)
     curveName = str(obj.name)
     splines = obj.data.splines
     return origin, numSplines, curveName, splines
+
+
+def processBlenderObjects():
+    objs = context.selected_objects
+    blenderVars = []
+    for obj in objs:
+        blenderVars.append(getBlenderObjVars(obj))
+    return blenderVars
 
 
 def getSplinePoints(spline):
@@ -150,7 +156,7 @@ def generateXML(fileName, num_splines, spline_name, invec_right, outvec_right, p
 
 def processData():
     # Get parameters from Blender curve
-    spline_origin, num_splines, curve_name, splines = getVars()
+    spline_origin, num_splines, curve_name, splines = getBlenderObjVars()
 
     # Define translate coordinates
     translate = transformCoordinate(spline_origin)
