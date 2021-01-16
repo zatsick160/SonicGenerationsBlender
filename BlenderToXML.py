@@ -1,8 +1,8 @@
+from bpy import context
+import numpy as np
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
-import numpy as np
-from bpy import context
 
 # User inputs
 filename = "C:/output.xml"
@@ -46,7 +46,7 @@ def transformMatrix(spline_points, translate):
         points[i, 2] = points[i, 2] - translate[2]
 
     # CALCULATE INVECS: Apply math to points
-    invecs = np.zeros(num_rows, num_cols)
+    invecs = np.zeros([num_rows, num_cols])
     for i in range(num_rows):
         if (i == 0):
             invecs[i, 0] = points[i, 0]
@@ -58,7 +58,7 @@ def transformMatrix(spline_points, translate):
             invecs[i, 2] = points[i, 2] - (1 / 3) * (points[i, 2] - points[i - 1, 2])
 
     # CALCULATE OUTVECS: Apply math to points
-    outvecs = np.zeros(num_rows, num_cols)
+    outvecs = np.zeros([num_rows, num_cols])
     for i in range(num_rows):
         if (i == num_rows - 1):
             outvecs[i, 0] = points[i, 0]
