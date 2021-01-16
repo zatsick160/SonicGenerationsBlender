@@ -41,9 +41,9 @@ def transformMatrix(spline_points, translate):
     for i in range(num_rows):
         points[i, 1] = points[i, 1] * -1
         points[i, 1], points[i, 2] = points[i, 2], points[i, 1]
-        points[i, 0] = points[i, 0] - translate[0]
-        points[i, 1] = points[i, 1] - translate[1]
-        points[i, 2] = points[i, 2] - translate[2]
+        points[i, 0] = points[i, 0] #- translate[0]
+        points[i, 1] = points[i, 1] #- translate[1]
+        points[i, 2] = points[i, 2] #- translate[2]
 
     # CALCULATE INVECS: Apply math to points
     invecs = np.zeros([num_rows, num_cols])
