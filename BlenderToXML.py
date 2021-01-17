@@ -177,7 +177,7 @@ def processData():
 
     root, lib = generateXMLHeader()
 
-    for i in range(blenderVars):
+    for i in range(len(blenderVars)):
         spline_origin, num_splines, curve_name, splines = getBlenderObjVars(blenderVars[i])
         translate = transformCoordinate(spline_origin)
 
