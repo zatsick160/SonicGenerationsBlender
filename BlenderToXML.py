@@ -1,3 +1,4 @@
+import copy
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
@@ -10,10 +11,10 @@ xmlPath = 'C:/SonicGenerations.xml'
 def getVars():
     objs = context.selected_objects
     obj = objs[0]
-    origin = obj.location
+    origin = copy.deepcopy(obj.location)
     numSplines = len(obj.data.splines)
     curveName = str(obj.name)
-    splines = obj.data.splines
+    splines = copy.deepcopy(obj.data.splines)
     return origin, numSplines, curveName, splines
 
 
