@@ -8,7 +8,6 @@ from bpy import context
 xmlPath = 'C:/SonicGenerations.xml'
 
 
-
 def getBlenderObjVars(obj):
     origin = copy.deepcopy(obj.location)
     numSplines = len(obj.data.splines)

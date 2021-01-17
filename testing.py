@@ -1,3 +1,5 @@
-x = 2 + 2
+from BlenderToXML import transformCoordinate
 
-print(x)
+a = transformCoordinate([1, 2, 3])
+
+assert(a == [0, 0, 0])
