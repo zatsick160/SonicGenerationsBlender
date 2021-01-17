@@ -1,11 +1,10 @@
-from bpy import context
-import numpy as np
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
+import numpy as np
+from bpy import context
 
-# User inputs
-filename = "C:/output.xml"
+xmlPath = 'C:/SonicGenerations.xml'
 
 
 def getVars():
@@ -41,9 +40,9 @@ def transformMatrix(spline_points, translate):
     for i in range(num_rows):
         points[i, 1] = points[i, 1] * -1
         points[i, 1], points[i, 2] = points[i, 2], points[i, 1]
-        points[i, 0] = points[i, 0] #- translate[0]
-        points[i, 1] = points[i, 1] #- translate[1]
-        points[i, 2] = points[i, 2] #- translate[2]
+        points[i, 0] = points[i, 0]  # - translate[0]
+        points[i, 1] = points[i, 1]  # - translate[1]
+        points[i, 2] = points[i, 2]  # - translate[2]
 
     # CALCULATE INVECS: Apply math to points
     invecs = np.zeros([num_rows, num_cols])
@@ -60,7 +59,7 @@ def transformMatrix(spline_points, translate):
     # CALCULATE OUTVECS: Apply math to points
     outvecs = np.zeros([num_rows, num_cols])
     for i in range(num_rows):
-        if (i == num_rows - 1):
+        if i == num_rows - 1:
             outvecs[i, 0] = points[i, 0]
             outvecs[i, 1] = points[i, 1]
             outvecs[i, 2] = points[i, 2]
@@ -73,10 +72,10 @@ def transformMatrix(spline_points, translate):
     return invecs, outvecs, points
 
 
-def generateXML(fileName, num_splines, spline_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
+def generateXML(filePath, num_splines, spline_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
                 point_left, translate):
     def stringCreator(value1, value2, value3):
-        string1, string2, string3 = '%.5f' % (value1), '%.5f' % (value2), '%.5f' % (value3)
+        string1, string2, string3 = '%.5f' % value1, '%.5f' % value2, '%.5f' % value3
         string = string1 + " " + string2 + " " + string3
         return string
 
@@ -144,11 +143,12 @@ def generateXML(fileName, num_splines, spline_name, invec_right, outvec_right, p
 
     xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="     ")
 
-    with open(filename, "w") as f:
+    with open(filePath, "w") as f:
         f.write(xmlstr)
 
 
 def processData():
+    outputPath = xmlPath
     # Get parameters from Blender curve
     spline_origin, num_splines, curve_name, splines = getVars()
 
@@ -159,14 +159,14 @@ def processData():
     if num_splines == 1:
         center = getSplinePoints(splines[0])
         invec_center, outvec_center, point_center = transformMatrix(center, translate)
-        generateXML(filename, num_splines, curve_name, invec_center, outvec_center, point_center, 0, 0, 0, translate)
+        generateXML(outputPath, num_splines, curve_name, invec_center, outvec_center, point_center, 0, 0, 0, translate)
     elif num_splines == 2:
         right = getSplinePoints(splines[0])
         invec_right, outvec_right, point_right = transformMatrix(right, translate)
         left = getSplinePoints(splines[1])
         invec_left, outvec_left, point_left = transformMatrix(left, translate)
-        generateXML(filename, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
-                    point_left, translate)
+        generateXML(outputPath, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left,
+                    outvec_left, point_left, translate)
 
 
 if __name__ == "__main__":
