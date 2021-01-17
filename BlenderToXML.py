@@ -14,12 +14,12 @@ def getVars():
     origin = copy.deepcopy(obj.location)
     numSplines = len(obj.data.splines)
     curveName = str(obj.name)
-    splines = copy.deepcopy(obj.data.splines)
+    splines = obj.data.splines
     return origin, numSplines, curveName, splines
 
 
 def getSplinePoints(spline):
-    return [point.co for point in spline.points]
+    return copy.deepcopy([point.co for point in spline.points])
 
 
 # Transforms a coordinate (multiply Y by negative 1 and swap Y and Z positions)
