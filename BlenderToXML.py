@@ -96,8 +96,8 @@ def generateXMLHeader():
     return root, lib
 
 
-def generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left, point_left):
-
+def generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
+                        point_left):
     geo = ET.Element("geometry", id=curve_name + "-geometry", name=curve_name + "-geometry")
     lib.append(geo)
     spl = ET.Element("spline", count=str(num_splines), width="0")
@@ -166,7 +166,6 @@ def generateScenes(scene, curve_name, translate):
 
 
 def writeXML(outputPath, root):
-
     # Writing root to XML file
     xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="     ")
 
@@ -175,7 +174,6 @@ def writeXML(outputPath, root):
 
 
 def processData():
-
     outputPath = xmlPath
 
     # Get parameters from Blender curves
@@ -200,7 +198,8 @@ def processData():
             invec_right, outvec_right, point_right = transformMatrix(right, translate)
             left = getSplinePoints(splines[1])
             invec_left, outvec_left, point_left = transformMatrix(left, translate)
-            generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left, point_left)
+            generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left,
+                                outvec_left, point_left)
             if i == 0:
                 scene = generateScene(root)
             generateScenes(scene, curve_name, translate)
