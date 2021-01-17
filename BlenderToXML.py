@@ -8,14 +8,20 @@ from bpy import context
 xmlPath = 'C:/SonicGenerations.xml'
 
 
-def getVars():
-    objs = context.selected_objects
-    obj = objs[0]
+def getBlenderObjVars(obj):
     origin = copy.deepcopy(obj.location)
     numSplines = len(obj.data.splines)
     curveName = str(obj.name)
     splines = obj.data.splines
     return origin, numSplines, curveName, splines
+
+
+def processBlenderObjects():
+    objs = context.selected_objects
+    blenderVars = []
+    for obj in objs:
+        blenderVars.append(getBlenderObjVars(obj))
+    return blenderVars
 
 
 def getSplinePoints(spline):
@@ -41,9 +47,9 @@ def transformMatrix(spline_points, translate):
     for i in range(num_rows):
         points[i, 1] = points[i, 1] * -1
         points[i, 1], points[i, 2] = points[i, 2], points[i, 1]
-        points[i, 0] = points[i, 0]  # - translate[0]
-        points[i, 1] = points[i, 1]  # - translate[1]
-        points[i, 2] = points[i, 2]  # - translate[2]
+        points[i, 0] = points[i, 0]
+        points[i, 1] = points[i, 1]
+        points[i, 2] = points[i, 2]
 
     # CALCULATE INVECS: Apply math to points
     invecs = np.zeros([num_rows, num_cols])
@@ -73,17 +79,26 @@ def transformMatrix(spline_points, translate):
     return invecs, outvecs, points
 
 
-def generateXML(filePath, num_splines, spline_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
-                point_left, translate):
-    def stringCreator(value1, value2, value3):
-        string1, string2, string3 = '%.5f' % value1, '%.5f' % value2, '%.5f' % value3
-        string = string1 + " " + string2 + " " + string3
-        return string
+def stringCreator(value1, value2, value3):
+    string1, string2, string3 = '%.5f' % value1, '%.5f' % value2, '%.5f' % value3
+    string = string1 + " " + string2 + " " + string3
+    return string
 
+
+def generateXMLHeader():
+    # XML header
     root = ET.Element("SonicPath")
+
+    # XML Geometry
     lib = ET.Element("library", type="GEOMETRY")
     root.append(lib)
-    geo = ET.Element("geometry", id=spline_name + "-geometry", name=spline_name + "-geometry")
+
+    return root, lib
+
+
+def generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left,
+                        point_left):
+    geo = ET.Element("geometry", id=curve_name + "-geometry", name=curve_name + "-geometry")
     lib.append(geo)
     spl = ET.Element("spline", count=str(num_splines), width="0")
     geo.append(spl)
@@ -124,9 +139,16 @@ def generateXML(filePath, num_splines, spline_name, invec_right, outvec_right, p
             pnt_string = stringCreator(point_left[i, 0], point_left[i, 1], point_left[i, 2])
             pnt.text = pnt_string
 
+
+def generateScene(root):
     scene = ET.Element("scene", id="DefaultScene")
     root.append(scene)
-    node = ET.Element("node", id=spline_name, name=spline_name)
+
+    return scene
+
+
+def generateScenes(scene, curve_name, translate):
+    node = ET.Element("node", id=curve_name, name=curve_name)
     scene.append(node)
 
     trans = ET.SubElement(node, "translate")
@@ -139,35 +161,50 @@ def generateXML(filePath, num_splines, spline_name, invec_right, outvec_right, p
     rotate = ET.SubElement(node, "rotate")
     rotate.text = "0 0 0 1"
 
-    instance = ET.Element("instance", url="#" + spline_name + "-geometry")
+    instance = ET.Element("instance", url="#" + curve_name + "-geometry")
     node.append(instance)
 
+
+def writeXML(outputPath, root):
+    # Writing root to XML file
     xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="     ")
 
-    with open(filePath, "w") as f:
+    with open(outputPath, "w") as f:
         f.write(xmlstr)
 
 
 def processData():
     outputPath = xmlPath
-    # Get parameters from Blender curve
-    spline_origin, num_splines, curve_name, splines = getVars()
 
-    # Define translate coordinates
-    translate = transformCoordinate(spline_origin)
+    # Get parameters from Blender curves
+    blenderVars = processBlenderObjects()
 
-    # Process data
-    if num_splines == 1:
-        center = getSplinePoints(splines[0])
-        invec_center, outvec_center, point_center = transformMatrix(center, translate)
-        generateXML(outputPath, num_splines, curve_name, invec_center, outvec_center, point_center, 0, 0, 0, translate)
-    elif num_splines == 2:
-        right = getSplinePoints(splines[0])
-        invec_right, outvec_right, point_right = transformMatrix(right, translate)
-        left = getSplinePoints(splines[1])
-        invec_left, outvec_left, point_left = transformMatrix(left, translate)
-        generateXML(outputPath, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left,
-                    outvec_left, point_left, translate)
+    root, lib = generateXMLHeader()
+
+    for i in range(len(blenderVars)):
+        spline_origin, num_splines, curve_name, splines = blenderVars[i]
+        translate = transformCoordinate(spline_origin)
+
+        # Process data
+        if num_splines == 1:
+            center = getSplinePoints(splines[0])
+            invec_center, outvec_center, point_center = transformMatrix(center, translate)
+            generateXMLGeometry(lib, num_splines, curve_name, invec_center, outvec_center, point_center, 0, 0, 0)
+            if i == 0:
+                scene = generateScene(root)
+            generateScenes(scene, curve_name, translate)
+        elif num_splines == 2:
+            right = getSplinePoints(splines[0])
+            invec_right, outvec_right, point_right = transformMatrix(right, translate)
+            left = getSplinePoints(splines[1])
+            invec_left, outvec_left, point_left = transformMatrix(left, translate)
+            generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left,
+                                outvec_left, point_left)
+            if i == 0:
+                scene = generateScene(root)
+            generateScenes(scene, curve_name, translate)
+
+    writeXML(outputPath, root)
 
 
 if __name__ == "__main__":
