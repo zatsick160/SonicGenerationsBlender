@@ -1,3 +1,4 @@
+import copy
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
@@ -7,8 +8,9 @@ from bpy import context
 xmlPath = 'C:/SonicGenerations.xml'
 
 
+
 def getBlenderObjVars(obj):
-    origin = obj.location
+    origin = copy.deepcopy(obj.location)
     numSplines = len(obj.data.splines)
     curveName = str(obj.name)
     splines = obj.data.splines
@@ -24,7 +26,7 @@ def processBlenderObjects():
 
 
 def getSplinePoints(spline):
-    return [point.co for point in spline.points]
+    return copy.deepcopy([point.co for point in spline.points])
 
 
 # Transforms a coordinate (multiply Y by negative 1 and swap Y and Z positions)
