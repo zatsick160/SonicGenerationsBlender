@@ -96,7 +96,7 @@ def generateXMLHeader():
     return root, lib
 
 
-def generateXMLBody(root, lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left, point_left, translate):
+def generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left, point_left):
 
     geo = ET.Element("geometry", id=curve_name + "-geometry", name=curve_name + "-geometry")
     lib.append(geo)
@@ -139,9 +139,15 @@ def generateXMLBody(root, lib, num_splines, curve_name, invec_right, outvec_righ
             pnt_string = stringCreator(point_left[i, 0], point_left[i, 1], point_left[i, 2])
             pnt.text = pnt_string
 
+
+def generateScene(root):
     scene = ET.Element("scene", id="DefaultScene")
     root.append(scene)
 
+    return scene
+
+
+def generateScenes(scene, curve_name, translate):
     node = ET.Element("node", id=curve_name, name=curve_name)
     scene.append(node)
 
@@ -185,13 +191,19 @@ def processData():
         if num_splines == 1:
             center = getSplinePoints(splines[0])
             invec_center, outvec_center, point_center = transformMatrix(center, translate)
-            generateXMLBody(root, lib, num_splines, curve_name, invec_center, outvec_center, point_center, 0, 0, 0, translate)
+            generateXMLGeometry(lib, num_splines, curve_name, invec_center, outvec_center, point_center, 0, 0, 0)
+            if i == 0:
+                scene = generateScene(root)
+            generateScenes(scene, curve_name, translate)
         elif num_splines == 2:
             right = getSplinePoints(splines[0])
             invec_right, outvec_right, point_right = transformMatrix(right, translate)
             left = getSplinePoints(splines[1])
             invec_left, outvec_left, point_left = transformMatrix(left, translate)
-            generateXMLBody(root, lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left, point_left, translate)
+            generateXMLGeometry(lib, num_splines, curve_name, invec_right, outvec_right, point_right, invec_left, outvec_left, point_left)
+            if i == 0:
+                scene = generateScene(root)
+            generateScenes(scene, curve_name, translate)
 
     writeXML(outputPath, root)
 
