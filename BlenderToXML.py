@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 from xml.dom import minidom
 
 import numpy as np
+import bpy
 from bpy import context
 
 xmlPath = 'C:/SonicGenerations.xml'
@@ -209,3 +210,4 @@ def processData():
 
 if __name__ == "__main__":
     processData()
+
